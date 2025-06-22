@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados da Análise - Amazônia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #181a20;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            background: #23242b;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 0 24px #00000030;
+            margin-top: 50px;
+        }
+        .graph-container {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 16px;
+            background: #232946;
+            box-shadow: 0 2px 16px #00000040;
+            transition: box-shadow 0.2s;
+        }
+        .graph-container:hover {
+            box-shadow: 0 4px 32px #007bff60;
+        }
+        .graph-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            background: #fff;
+            padding: 8px;
+        }
+        .analise-container {
+            margin: 20px 0;
+            padding: 24px;
+            border-radius: 16px;
+            background: #23242b;
+            box-shadow: 0 2px 16px #00000040;
+        }
+        .analise-texto {
+            white-space: pre-line;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.7;
+            color: #fff;
+        }
+        .alerta {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 5px solid;
+        }
+        .alerta-alta {
+            background-color: #2d1a1a;
+            border-left-color: #dc3545;
+            color: #ffb3b3;
+        }
+        .alerta-media {
+            background-color: #2d2a1a;
+            border-left-color: #ffc107;
+            color: #ffe082;
+        }
+        .insight-card {
+            background-color: #232946;
+            color: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .recomendacao-card {
+            background-color: #1a2d23;
+            color: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 5px solid #198754;
+        }
+        h1, h3, h4 {
+            color: #007bff;
+            font-weight: 700;
+        }
+        .btn-primary, .btn-success {
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px #007bff40;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #007bff 0%, #232946 100%);
+        }
+        .btn-success {
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            color: #232946;
+        }
+        .btn-primary:hover, .btn-success:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 16px #007bff80;
+        }
+        @media (max-width: 900px) {
+            .row { flex-direction: column; }
+            .col-md-6 { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Resultados da Análise</h1>
+        
+        <!-- Seção de Análise do Agente -->
+        <div class="analise-container">
+            <h3 class="mb-4">Análise Autônoma</h3>
+            {% if analise_agente %}
+                <!-- Alertas -->
+                <h4>Alertas</h4>
+                {% if analise_agente.alertas %}
+                    {% for alerta in analise_agente.alertas %}
+                    <div class="alerta {% if alerta.severidade == 'alta' %}alerta-alta{% else %}alerta-media{% endif %}">
+                        <strong>{{ alerta.tipo }}</strong>
+                        <p>{{ alerta.descricao }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Nenhum alerta gerado.</p>
+                {% endif %}
+                <!-- Insights -->
+                <h4 class="mt-4">Insights</h4>
+                {% if analise_agente.insights %}
+                    {% for insight in analise_agente.insights %}
+                    <div class="insight-card">
+                        <strong>{{ insight.tipo }}</strong>
+                        <p>{{ insight.descricao }}</p>
+                        {% if insight.detalhes %}
+                        <small>{{ insight.detalhes }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Nenhum insight gerado.</p>
+                {% endif %}
+                <!-- Recomendações -->
+                <h4 class="mt-4">Recomendações</h4>
+                {% if analise_agente.recomendacoes %}
+                    {% for recomendacao in analise_agente.recomendacoes %}
+                    <div class="recomendacao-card">
+                        <strong>{{ recomendacao.tipo }}</strong>
+                        <p>{{ recomendacao.descricao }}</p>
+                        <small>Prioridade: {{ recomendacao.prioridade }}</small>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Nenhuma recomendação gerada.</p>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-warning">
+                    Nenhuma análise do agente disponível.
+                </div>
+            {% endif %}
+        </div>
+        <!-- Seção de Análise Detalhada -->
+        <div class="analise-container">
+            <h3 class="mb-4">Análise Detalhada</h3>
+            <div class="analise-texto">
+                {{ analise | safe }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="graph-container">
+                    <h3>Evolução do Desmatamento</h3>
+                    <img src="/imagem/evolucao_amazonia_legal.png" alt="Evolução do Desmatamento">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="graph-container">
+                    <h3>Estados Mais Afetados</h3>
+                    <img src="/imagem/estados_mais_afetados.png" alt="Estados Mais Afetados">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="graph-container">
+                    <h3>Correlação entre Estados</h3>
+                    <img src="/imagem/correlacao_estados.png" alt="Correlação entre Estados">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="graph-container">
+                    <h3>Previsão Futura</h3>
+                    <img src="/imagem/previsao_futura.png" alt="Previsão Futura">
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">Nova Análise</a>
+            <a href="/perguntas" class="btn btn-success ms-2">Fazer Perguntas</a>
+        </div>
+    </div>
+</body>
+</html> 

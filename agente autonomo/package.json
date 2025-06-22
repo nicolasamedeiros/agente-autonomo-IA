@@ -1,0 +1,12 @@
+{
+  "name": "desmatamento-amazonia-modelo-preditivo---v1-criado-07-06",
+  "version": "1.0.0",
+  "description": "<p>Esse projeto é sobre uma previsão de como será o desmatamento da amazônia nos próximos cinco anos, para fazer essa previsão utilizamos a regressão linear simples e ARIMA, para ver se a diferença de uma para a outra era muito grande</p>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

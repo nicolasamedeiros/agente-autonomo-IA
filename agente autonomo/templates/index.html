@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Desmatamento - Amazônia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #181a20;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            background: #23242b;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 0 24px #00000030;
+            margin-top: 50px;
+        }
+        h1, h2, h3, h4 {
+            color: #007bff;
+            font-weight: 700;
+        }
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 24px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            background: #232946;
+            color: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .upload-area:hover {
+            border-color: #43e97b;
+            box-shadow: 0 0 16px #007bff80;
+        }
+        .btn-primary {
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px #007bff40;
+            border: none;
+            background: linear-gradient(90deg, #007bff 0%, #232946 100%);
+        }
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 16px #007bff80;
+        }
+        #fileName {
+            color: #43e97b;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Análise de Desmatamento na Amazônia</h1>
+        <p class="text-center mb-4">Faça o upload do arquivo CSV para iniciar a análise</p>
+        
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" name="file" accept=".csv" style="display: none;" onchange="updateFileName(this)">
+                <div id="uploadText">
+                    <i class="bi bi-cloud-upload"></i>
+                    <p>Clique para selecionar um arquivo CSV</p>
+                </div>
+                <div id="fileName" style="display: none;"></div>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Analisar Dados</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        function updateFileName(input) {
+            const fileName = input.files[0]?.name;
+            const uploadText = document.getElementById('uploadText');
+            const fileNameDiv = document.getElementById('fileName');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (fileName) {
+                uploadText.style.display = 'none';
+                fileNameDiv.style.display = 'block';
+                fileNameDiv.innerHTML = `Arquivo selecionado: ${fileName}`;
+                submitBtn.disabled = false;
+            } else {
+                uploadText.style.display = 'block';
+                fileNameDiv.style.display = 'none';
+                submitBtn.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html> 

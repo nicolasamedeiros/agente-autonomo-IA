@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perguntas sobre Desmatamento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #181a20;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+        }
+        .container {
+            max-width: 800px;
+            background: #23242b;
+            border-radius: 18px;
+            box-shadow: 0 0 24px #00000030;
+            padding: 30px;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        .chat-container {
+            height: 60vh;
+            overflow-y: scroll;
+            border: 1px solid #232946;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #232946;
+        }
+        .message-wrapper {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .user-message .message-bubble {
+            background: linear-gradient(90deg, #007bff 0%, #232946 100%);
+            color: #fff;
+            border-bottom-right-radius: 2px;
+            margin-left: auto;
+        }
+        .agent-message .message-bubble {
+            background: #23242b;
+            color: #fff;
+            border-bottom-left-radius: 2px;
+        }
+        .message-bubble {
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .message-bubble img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .input-group .form-control {
+            border-radius: 20px 0 0 20px;
+            padding: 10px 15px;
+            background: #232946;
+            color: #fff;
+            border: 1px solid #007bff;
+        }
+        .input-group .form-control:focus {
+            background: #232946;
+            color: #fff;
+            border-color: #43e97b;
+        }
+        .input-group .btn {
+            border-radius: 0 20px 20px 0;
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #007bff 0%, #232946 100%);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: none;
+            box-shadow: 0 2px 8px #007bff40;
+        }
+        .input-group .btn:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 16px #007bff80;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(0,0,0,.1);
+            border-radius: 50%;
+            border-top-color: #007bff;
+            animation: spin 1s ease-in-out infinite;
+            -webkit-animation: spin 1s ease-in-out infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        @keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+        @-webkit-keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Perguntas sobre Desmatamento</h1>
+        
+        <div class="chat-container" id="chatContainer">
+            <!-- Mensagens serão adicionadas aqui pelo JavaScript -->
+        </div>
+
+        <form id="questionForm" class="mb-4">
+            <div class="input-group">
+                <input type="text" id="questionInput" class="form-control" placeholder="Digite sua pergunta..." required>
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let lastUpdate = 0;
+        let updateInterval = null;
+        const UPDATE_DELAY = 2000; // 2 segundos entre atualizações
+
+        function addMessageToChat(pergunta, resposta) {
+            const chatMessages = document.getElementById('chatContainer');
+            if (!chatMessages) return;
+
+            // Mensagem da pergunta
+            const userMessageWrapper = document.createElement('div');
+            userMessageWrapper.className = 'message-wrapper user-message';
+            const userMessageBubble = document.createElement('div');
+            userMessageBubble.className = 'message-bubble';
+            userMessageBubble.textContent = pergunta;
+            userMessageWrapper.appendChild(userMessageBubble);
+            chatMessages.appendChild(userMessageWrapper); // Adiciona ao final
+
+            // Mensagem da resposta
+            const agentMessageWrapper = document.createElement('div');
+            agentMessageWrapper.className = 'message-wrapper agent-message';
+            const agentMessageBubble = document.createElement('div');
+            agentMessageBubble.className = 'message-bubble';
+            
+            if (resposta === 'Aguarde, sua pergunta está sendo analisada...') {
+                agentMessageBubble.innerHTML = `Processando... <span class="loading-spinner"></span>`;
+            } else {
+                agentMessageBubble.innerHTML = resposta;
+            }
+            agentMessageWrapper.appendChild(agentMessageBubble);
+            chatMessages.appendChild(agentMessageWrapper); // Adiciona ao final
+
+            // Rola para o final do chat
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function updateResponses() {
+            const now = Date.now();
+            if (now - lastUpdate < UPDATE_DELAY) {
+                return;
+            }
+            lastUpdate = now;
+
+            fetch('/perguntas', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Dados recebidos do backend:', data);
+                    const chatContainer = document.getElementById('chatContainer');
+                    if (!chatContainer) return;
+
+                    // Limpa o chat atual para reconstruir
+                    chatContainer.innerHTML = '';
+
+                    // Adiciona as mensagens na ordem cronológica (mais antigas primeiro)
+                    data.forEach(item => {
+                        const userMessageWrapper = document.createElement('div');
+                        userMessageWrapper.className = 'message-wrapper user-message';
+                        const userMessageBubble = document.createElement('div');
+                        userMessageBubble.className = 'message-bubble';
+                        userMessageBubble.textContent = item.pergunta;
+                        userMessageWrapper.appendChild(userMessageBubble);
+                        chatContainer.appendChild(userMessageWrapper); // Adiciona ao final
+
+                        const agentMessageWrapper = document.createElement('div');
+                        agentMessageWrapper.className = 'message-wrapper agent-message';
+                        const agentMessageBubble = document.createElement('div');
+                        agentMessageBubble.className = 'message-bubble';
+                        
+                        if (item.resposta === 'Aguarde, sua pergunta está sendo analisada...') {
+                            agentMessageBubble.innerHTML = `Processando... <span class="loading-spinner"></span>`;
+                        } else {
+                            agentMessageBubble.innerHTML = item.resposta;
+                        }
+                        agentMessageWrapper.appendChild(agentMessageBubble);
+                        chatContainer.appendChild(agentMessageWrapper); // Adiciona ao final
+                    });
+
+                    // Rola para o final do chat
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar respostas:', error);
+                });
+        }
+
+        function startUpdates() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+            updateInterval = setInterval(updateResponses, UPDATE_DELAY);
+        }
+
+        function stopUpdates() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+        }
+
+        document.getElementById('questionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const questionInput = document.getElementById('questionInput');
+            const question = questionInput.value.trim();
+            
+            if (!question) return;
+
+            // Adiciona a pergunta imediatamente com o placeholder
+            addMessageToChat(question, 'Aguarde, sua pergunta está sendo analisada...');
+            questionInput.value = ''; // Limpa o input
+            
+            // Envia a pergunta para o servidor usando FormData
+            const formData = new FormData();
+            formData.append('pergunta', question);
+            
+            fetch('/perguntar', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // A atualização será feita pelo updateResponses
+                } else {
+                    console.error('Erro ao enviar pergunta:', data.message);
+                    // Exibir erro na interface, se necessário
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar pergunta:', error);
+                // Exibir erro na interface, se necessário
+            });
+        });
+
+        // Inicia as atualizações quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            startUpdates();
+            updateResponses(); // Força uma atualização inicial para carregar o histórico
+        });
+
+        // Para as atualizações quando a página é fechada
+        window.addEventListener('beforeunload', function() {
+            stopUpdates();
+        });
+    </script>
+</body>
+</html> 
