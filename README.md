@@ -7,7 +7,7 @@ Este projeto tem como objetivo desenvolver um **agente autônomo de inteligênci
 - 📂 **Leitura e análise automática de arquivos CSV**  
   O agente importa o arquivo e realiza uma análise inicial, identificando colunas, tipos de dados, valores ausentes, estatísticas descritivas, entre outras informações úteis.
   
-- 💬 **Chatbot inteligente**  
+- 💬 **Agente autônomo**  
   Você pode interagir com o agente por meio de uma interface de chat e fazer perguntas como:
   - "Qual foi o estado mais desmatado ?"
   - "Quais medidas podem ser tomadas para não se desmatar mais ?"
